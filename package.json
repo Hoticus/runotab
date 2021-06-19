@@ -1,0 +1,27 @@
+{
+    "devDependencies": {
+        "@symfony/stimulus-bridge": "^2.0.0",
+        "@symfony/webpack-encore": "^1.0.0",
+        "autoprefixer": "^10.2.6",
+        "core-js": "^3.0.0",
+        "file-loader": "^6.0.0",
+        "glob-all": "^3.2.1",
+        "postcss-loader": "^5.0.0",
+        "purgecss-webpack-plugin": "^4.0.3",
+        "regenerator-runtime": "^0.13.2",
+        "stimulus": "^2.0.0",
+        "tailwindcss": "^2.1.4",
+        "webpack-notifier": "^1.6.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@tailwindcss/forms": "^0.3.3"
+    }
+}

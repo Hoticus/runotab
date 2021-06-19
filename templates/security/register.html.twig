@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Registration in Runotab{% endtrans %}{% endblock %}
+
+{% block main %}
+    <main class="mt-12 lg:mt-32 mb-8">
+        <div class="container mx-auto grid lg:grid-cols-2">
+            <div class="flex flex-col items-center hidden sm:block">
+                <h1 class="text-4xl lg:text-5xl text-center font-bold mb-6 lg:mb-16">
+                    {% trans %}Runotab is a closed social network, so you need to have an invitation code to register.{% endtrans %}
+                </h1>
+                <img src="{{ asset('build/images/register.svg') }}" alt="" class="w-4/5 hidden lg:block">
+            </div>
+            <div>
+                <h2 class="text-4xl text-center font-extrabold">{% trans %}Registration{% endtrans %}</h2>
+                {{ form_start(registrationForm, {'attr': {'class': 'flex flex-col w-4/5 mx-auto space-y-7 mt-7'}}) }}
+                    <div class="relative">
+                        {{ form_widget(registrationForm.invitationCode, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:space-x-10 space-y-7 sm:space-y-0">
+                        <div class="relative">
+                            {{ form_widget(registrationForm.name, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="relative">
+                            {{ form_widget(registrationForm.surname, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                        </svg>
+                    </div>
+                    <div class="relative">
+                        {{ form_widget(registrationForm.password.first, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="relative">
+                        {{ form_widget(registrationForm.password.second, {'attr': {'class': 'rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg'}}) }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>                
+                    </div>
+
+                    <button type="submit" class="bg-blue-400 hover:bg-blue-500 py-3 rounded-full border text-white font-extrabold text-xl w-full sm:w-1/2 lg:w-3/5 xl:w-1/2 mx-auto focus:outline-none">{% trans %}Register{% endtrans %}</button>
+                    
+                    {% if first_form_error %}
+                        <div class="bg-red-600 text-center mx-auto px-4 py-4 rounded-full font-bold text-md sm:text-lg text-white mt-4">
+                            {% trans %}Error{% endtrans %}:
+                            {{ first_form_error }}
+                        </div>
+                    {% endif %}
+                    {% for flashError in app.flashes('registration_error') %}
+                        <div class="bg-red-600 text-center mx-auto px-4 py-4 rounded-full font-bold text-md sm:text-lg text-white mt-4" role="alert">
+                            {% trans %}Error{% endtrans %}:
+                            {{ flashError|trans({}, 'validators') }}
+                        </div>
+                    {% endfor %}
+
+                    <a class="mt-4 mx-auto" href="{{ path('app_login') }}">{% trans %}Already have an account?{% endtrans %}</a>
+                {{ form_end(registrationForm) }}
+                <script>
+                    var invitation_code = document.getElementById("registration_form_invitationCode");
+                    var events = ['input', 'change', 'blur', 'keyup'];
+                    for (var i in events) {
+                        invitation_code.addEventListener(events[i], format, false);
+                    }
+                    function format() {
+                        var formatted_code = this.value.toUpperCase();
+                        formatted_code = formatted_code.replace(/[^A-Z0-9]/g, "").substring(0, 16);
+                        formatted_code = formatted_code !== "" ? formatted_code.match(/.{1,4}/g).join("-") : "";
+                        this.value = formatted_code;
+                    }
+                </script>
+            </div>
+        </div>
+    </main>
+{% endblock %}

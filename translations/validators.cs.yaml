@@ -1,0 +1,25 @@
+A email should have {{ limit }} characters or less.: Email musí obsahovat {{ limit }} znaků nebo méně.
+A name should have {{ limit }} characters or less.: Jméno musí obsahovat {{ limit }} znaků nebo méně.
+A surname should have {{ limit }} characters or less.: Příjmení musí obsahovat {{ limit }} znaků nebo méně.
+An invitation code should have exactly {{ limit }} characters.: Kód pozvánky musí obsahovat přesně {{ limit }} znaků.
+Passwords must match.: Hesla se musí shodovat.
+Please enter a email address.: Zadejte prosím email.
+Please enter a name.: Zadejte prosím jméno.
+Please enter a password.: Zadejte prosím heslo.
+Please enter a surname.: Zadejte prosím příjmení. 
+Please enter a valid email address.: Zadejte prosím platný email.
+Please enter a valid invitation code.: Zadejte prosím platný kód pozvánky.
+Please enter an invitation code.: Zadejte prosím kód pozvánky.
+There is no account with this email.: Neexistuje žádný účet s tímto emailem.
+This code is invalid. We have sent you a new mail with a new code.: Tento kód není platný. Poslali jsme vám nový email s novým kódem.
+This code is invalid.: Tento kód není platný.
+This code is not a 6-digit code.: Tento kód není 6-místný kód.
+This code should have exactly {{ limit }} characters.: Tento kód musí obsahovat přesně {{ limit }} znaků.
+This code should not be blank.: Tento kód by neměl být prázdný.
+Verification code is invalid. We have sent you a new mail with a new code.: Ověřovací kód není platný. Poslali jsme vám nový email s novým kódem.
+Verification code is invalid.: Ověřovací kód není platný.
+Wait 60 seconds before sending a new mail.: Počkejte 60 sekund před odesláním nového emailu.
+We have sent you a new mail with a new code.: Poslali jsme vám nový email s novým kódem.
+Your password has been successfully changed.: Vaše heslo bylo úspěšně změněno.
+Your password should be at least {{ limit }} characters.: Vaše heslo musí obsahovat alespoň {{ limit }} znaků.
+Your password should have {{ limit }} characters or less.: Vaše heslo musí obsahovat {{ limit }} znaků nebo méně.

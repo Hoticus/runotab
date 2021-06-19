@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Log in Runotab!{% endtrans %}{% endblock %}
+
+{% block main %}
+    <main class="mt-12 lg:mt-32 mb-8 sm:mb-0">
+        <div class="container px-4 mx-auto grid lg:grid-cols-2">
+            <div class="lg:w-4/5">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl text-center font-bold">{% trans %}Welcome to Runotab - a social network for ours!{% endtrans %}</h1>
+                <img class="hidden lg:block mt-16" src="{{ asset('build/images/login.svg') }}" alt="">
+            </div>
+            <form method="post" class="flex flex-col w-4/5 mx-auto mt-6 lg:mt-0">
+                <h2 class="text-4xl text-center font-extrabold">{% trans %}Login{% endtrans %}</h2>
+                <div class="relative mt-7">
+                    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" autocomplete="email" required autofocus class="rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg" placeholder="{% trans %}Email{% endtrans %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                </div>
+                <div class="relative mt-7">
+                    <input type="password" name="password" id="inputPassword" autocomplete="current-password" required class="rounded-full bg-gray-100 border-0 focus:ring-transparent w-full pl-16 font-bold py-4 placeholder-gray-400 text-lg" placeholder="{% trans %}Password{% endtrans %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute top-1/3 left-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            
+                <input type="hidden" name="_csrf_token"
+                    value="{{ csrf_token('authenticate') }}"
+                >
+        
+                <button class="bg-blue-400 hover:bg-blue-500 py-3 rounded-full border mt-7 text-white font-extrabold text-xl w-full sm:w-1/3 mx-auto focus:outline-none" type="submit">
+                    {% trans %}Log in{% endtrans %}
+                </button>
+
+                {% if error %}
+                    <div class="bg-red-600 text-center mx-auto px-4 py-4 rounded-full font-bold text-md sm:text-lg text-white mt-4">
+                        {% trans %}Error{% endtrans %}:
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+                {% for flashNotice in app.flashes('login_notice') %}
+                    <div class="bg-yellow-500 text-center mx-auto px-4 py-4 rounded-full font-bold text-md sm:text-lg text-white mt-4" role="alert">
+                        {{ flashNotice|trans({}, 'validators') }}
+                    </div>
+                {% endfor %}
+
+                <div class="flex flex-col sm:flex-row sm:space-x-6 mt-4 mx-auto text-center">
+                    <a href="{{ path('app_restore_password_first') }}">{% trans %}Forgot your password?{% endtrans %}</a>
+                    <span class="hidden sm:block w-px bg-gray-300"></span>
+                    <a href="{{ path('app_register') }}">{% trans %}Don't have an account?{% endtrans %}</a>
+                </div>
+            </form>
+        </div>
+    </main>
+{% endblock %}

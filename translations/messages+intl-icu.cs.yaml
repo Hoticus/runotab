@@ -1,0 +1,6 @@
+invite_users: >-
+  {users, plural,
+    one {1 uživatele}
+    few {# uživatele}
+    other {# uživatelů}
+  }

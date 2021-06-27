@@ -54,12 +54,27 @@ class User implements UserInterface
     private $surname;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $avatar_photo;
+
+    /**
+     * @ORM\Column(type="smallint")
+     */
+    private $rating = 0;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $invitations = [0, []];
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $invited_by;
 
     /**
-     * @ORM\Column(type="string", length=4, options={"default": "en"})
+     * @ORM\Column(type="string", length=4)
      */
     private $locale;
 
@@ -182,6 +197,42 @@ class User implements UserInterface
     public function setSurname(string $surname): self
     {
         $this->surname = $surname;
+
+        return $this;
+    }
+
+    public function getAvatarPhoto(): ?int
+    {
+        return $this->avatar_photo;
+    }
+
+    public function setAvatarPhoto(?int $avatar_photo): self
+    {
+        $this->avatar_photo = $avatar_photo;
+
+        return $this;
+    }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    public function setRating(int $rating): self
+    {
+        $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function getInvitations(): ?array
+    {
+        return $this->invitations;
+    }
+
+    public function setInvitations(array $invitations): self
+    {
+        $this->invitations = $invitations;
 
         return $this;
     }

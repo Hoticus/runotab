@@ -1,0 +1,5 @@
+invite_users: >-
+  {users, plural,
+    one {1 user}
+    other {# users}
+  }

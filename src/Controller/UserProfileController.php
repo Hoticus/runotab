@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserProfileController extends AbstractController
 {
     /**
-     * @Route("/u{id}", name="user_profile")
+     * @Route("/u{id<\d+>}", name="user_profile")
      */
     public function index(int $id): Response
     {

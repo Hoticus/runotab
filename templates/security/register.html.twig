@@ -72,13 +72,13 @@
                     <a class="mt-4 mx-auto" href="{{ path('app_login') }}">{% trans %}Already have an account?{% endtrans %}</a>
                 {{ form_end(registrationForm) }}
                 <script>
-                    var invitation_code = document.getElementById("registration_form_invitationCode");
-                    var events = ['input', 'change', 'blur', 'keyup'];
-                    for (var i in events) {
+                    const invitation_code = document.getElementById("registration_form_invitationCode");
+                    const events = ['input', 'change', 'blur', 'keyup'];
+                    for (let i in events) {
                         invitation_code.addEventListener(events[i], format, false);
                     }
                     function format() {
-                        var formatted_code = this.value.toUpperCase();
+                        let formatted_code = this.value.toUpperCase();
                         formatted_code = formatted_code.replace(/[^A-Z0-9]/g, "").substring(0, 16);
                         formatted_code = formatted_code !== "" ? formatted_code.match(/.{1,4}/g).join("-") : "";
                         this.value = formatted_code;

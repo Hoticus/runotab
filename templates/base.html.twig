@@ -6,7 +6,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap" rel="stylesheet">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% if app.user and not app.request.cookies.get('timezone') %}
+            <script>
+                window.location.replace("{{ path('app_set_timezone') | escape('js') }}?timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone + "&return=" + window.location.href);
+            </script>
+        {% endif %}
+        <title>{% block title %}Runotab{% endblock %}</title>
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}

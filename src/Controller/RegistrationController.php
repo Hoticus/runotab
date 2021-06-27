@@ -131,6 +131,10 @@ class RegistrationController extends AbstractController
                 }
 
                 $user->setInvitedBy($invitation->getCreatedBy());
+                if ($invited_by = $em->getRepository(User::class)->find($invitation->getCreatedBy())) {
+                    $user->setRating(floor($invited_by->getRating() / 2));
+                    $user->setInvitations([floor($invited_by->getRating() / 2), []]);
+                }
                 $user->setLocale($request->getLocale());
                 $this->session->set('_locale', $request->getLocale());
 

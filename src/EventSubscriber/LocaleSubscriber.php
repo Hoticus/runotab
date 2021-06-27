@@ -7,19 +7,28 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Twig\Environment;
+use Twig\Extension\CoreExtension;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
     private $parameter_bag;
+    private $twig;
 
-    public function __construct(ParameterBagInterface $parameter_bag)
+    public function __construct(ParameterBagInterface $parameter_bag, Environment $twig)
     {
         $this->parameter_bag = $parameter_bag;
+        $this->twig = $twig;
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
+
+        if ($user_timezone = $request->cookies->get('timezone')) {
+            $this->twig->getExtension(CoreExtension::class)->setTimezone($user_timezone);
+        }
+
         if (!$request->hasPreviousSession()) {
             return;
         }

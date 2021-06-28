@@ -132,6 +132,13 @@ class RegistrationController extends AbstractController
 
                 $user->setInvitedBy($invitation->getCreatedBy());
                 if ($invited_by = $em->getRepository(User::class)->find($invitation->getCreatedBy())) {
+                    $invited_by_user_invitations = $invited_by->getInvitations();
+                    unset($invited_by_user_invitations[1][array_search(
+                        $invitation->getId(),
+                        $invited_by_user_invitations[1]
+                    )]);
+                    $invited_by_user_invitations[1] = array_values($invited_by_user_invitations[1]);
+                    $invited_by->setInvitations($invited_by_user_invitations);
                     $user->setRating(floor($invited_by->getRating() / 2));
                     $user->setInvitations([floor($invited_by->getRating() / 2), []]);
                 }

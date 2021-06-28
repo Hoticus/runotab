@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AuthController extends AbstractController
@@ -92,7 +92,7 @@ class AuthController extends AbstractController
     public function restorePasswordSecond(
         Request $request,
         SessionInterface $session,
-        UserPasswordEncoderInterface $password_encoder,
+        UserPasswordHasherInterface $password_encoder,
         MailerInterface $mailer
     ) {
         if (!$email = $session->get('password_recovery_email')) {
@@ -110,7 +110,7 @@ class AuthController extends AbstractController
             if ($form->get('recovery_code')->getData() == $session->get('recovery_code')) {
                 // encode the plain password
                 $user->setPassword(
-                    $password_encoder->encodePassword(
+                    $password_encoder->hashPassword(
                         $user,
                         $form->get('password')->getData()
                     )

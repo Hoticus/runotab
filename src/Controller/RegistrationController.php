@@ -6,27 +6,27 @@ use App\Entity\Invitation;
 use App\Entity\User;
 use App\Form\EmailVerificationFormType;
 use App\Form\RegistrationFormType;
-use App\Security\LoginFormAuthenticator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
 class RegistrationController extends AbstractController
 {
     private $mailer;
     private $session;
 
-    public function __construct(MailerInterface $mailer, SessionInterface $session)
+    public function __construct(MailerInterface $mailer, RequestStack $request_stack)
     {
         $this->mailer = $mailer;
-        $this->session = $session;
+        $this->session = $request_stack->getSession();
     }
 
     /**
@@ -34,7 +34,7 @@ class RegistrationController extends AbstractController
      */
     public function register(
         Request $request,
-        UserPasswordEncoderInterface $password_encoder
+        UserPasswordHasherInterface $password_encoder
     ): Response {
         $user = new User();
         $this->session->set('user', $user);
@@ -57,9 +57,8 @@ class RegistrationController extends AbstractController
             }
             $this->session->set('invitation_code', $invitation_code);
 
-            // encode the plain password
             $user->setPassword(
-                $password_encoder->encodePassword(
+                $password_encoder->hashPassword(
                     $user,
                     $form->get('password')->getData()
                 )
@@ -99,9 +98,8 @@ class RegistrationController extends AbstractController
      */
     public function verifyUserEmail(
         Request $request,
-        GuardAuthenticatorHandler $guard_handler,
-        LoginFormAuthenticator $authenticator
-    ): Response {
+        TokenStorageInterface $token_storage
+    ) {
         $user = $this->session->get('user');
         $verification_code = $this->session->get('verification_code');
 
@@ -138,17 +136,15 @@ class RegistrationController extends AbstractController
                 $user->setLocale($request->getLocale());
                 $this->session->set('_locale', $request->getLocale());
 
-
                 $em->persist($user);
                 $em->remove($invitation);
                 $em->flush();
 
-                return $guard_handler->authenticateUserAndHandleSuccess(
-                    $user,
-                    $request,
-                    $authenticator,
-                    'main'
-                );
+                $token = new PostAuthenticationToken($user, 'main', $user->getRoles());
+                $token_storage->setToken($token);
+                $this->session->set('_security_main', serialize($token));
+
+                return $this->redirectToRoute('default');
             }
 
             if ($this->session->get('email_sending_cooldown_end') < time()) {

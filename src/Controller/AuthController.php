@@ -15,9 +15,17 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthController extends AbstractController
 {
+    private $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @Route("/login", name="app_login")
      */
@@ -67,7 +75,7 @@ class AuthController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject('Password Recovery')
+                ->subject($this->translator->trans('Password Recovery'))
                 ->htmlTemplate('security/password_recovery_mail.html.twig')
                 ->context([
                     'recovery_code' => $recovery_code,
@@ -136,7 +144,7 @@ class AuthController extends AbstractController
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
                     ->to($user->getEmail())
-                    ->subject('Password Recovery')
+                    ->subject($this->translator->trans('Password Recovery'))
                     ->htmlTemplate('security/password_recovery_mail.html.twig')
                     ->context([
                         'recovery_code' => $recovery_code,
@@ -194,7 +202,7 @@ class AuthController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject('Password Recovery')
+                ->subject($this->translator->trans('Password Recovery'))
                 ->htmlTemplate('security/password_recovery_mail.html.twig')
                 ->context([
                     'recovery_code' => $recovery_code,

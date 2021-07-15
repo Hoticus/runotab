@@ -141,15 +141,16 @@ class RegistrationController extends AbstractController
                         $invited_by_user_invitations[1]
                     )]);
                     $invited_by_user_invitations[1] = array_values($invited_by_user_invitations[1]);
-                    $invited_by->setInvitations($invited_by_user_invitations);
                     $user->setRating(floor($invited_by->getRating() / 2));
-                    $user->setInvitations([floor($invited_by->getRating() / 2), []]);
+                    $user->setInvitations([floor($invited_by->getRating() / 2), [], []]);
                 }
                 $user->setLocale($request->getLocale());
                 $this->session->set('_locale', $request->getLocale());
 
                 $em->persist($user);
                 $em->remove($invitation);
+                $invited_by_user_invitations[2][] = $user->getId();
+                $invited_by->setInvitations($invited_by_user_invitations);
                 $em->flush();
 
                 $token = new PostAuthenticationToken($user, 'main', $user->getRoles());

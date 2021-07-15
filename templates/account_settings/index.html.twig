@@ -7,9 +7,9 @@
         <div class="container mx-auto">
             {# Profile settings #}
             <h2 class="text-3xl font-medium text-gray-400">{% trans %}Profile settings{% endtrans %}:</h2>
-            <div class="flex items-center space-x-8 my-6">
-                <div id="current_avatar" class="bg-cover w-32 h-32 rounded-full" style="background-image: url({{ asset(avatar_photo) }})"></div>
-                <h3 class="text-4xl font-semibold">{{ app.user.name ~ " " ~ app.user.surname }}</h3>
+            <div class="flex items-center my-6">
+                <div id="current_avatar" class="bg-cover w-32 h-32 rounded-full mr-8 min-w-32" style="background-image: url({{ asset(avatar_photo) }})"></div>
+                <h3 class="text-4xl max-w-full break-words font-semibold">{{ app.user.name ~ " " ~ app.user.surname }}</h3>
             </div>
             {{ form_start(form) }}
                 {{ form_widget(form.photo, {'attr': {'class': 'hidden'}}) }}
@@ -49,10 +49,12 @@
             <hr class="my-12">
             {# Invitations #}
             <h2 class="text-3xl font-medium text-gray-400 mb-4">{% trans %}Invitations{% endtrans %}:</h2>
-            <h3 class="text-2xl font-semibold inline-block">{% trans %}You can invite{% endtrans %} {% trans with {'users': app.user.invitations[0]} %}invite_users{% endtrans %}</h3>
-            {% if app.user.invitations[0] > 0 %}
-                <a class="ml-6 inline-block bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl focus:outline-none w-1/5 text-center" href="{{ path('create_invitation') }}">{% trans %}Create an invitation{% endtrans %}</a>
-            {% endif %}
+            <div>
+                <h3 class="text-2xl font-semibold inline-block">{% trans %}You can invite{% endtrans %} {% trans with {'users': app.user.invitations[0]} %}invite_users{% endtrans %}</h3>
+                {% if app.user.invitations[0] > 0 %}
+                    <a class="ml-6 inline-block bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl focus:outline-none w-1/5 text-center" href="{{ path('create_invitation') }}">{% trans %}Create an invitation{% endtrans %}</a>
+                {% endif %}
+            </div>
             {% for flashCode in app.flashes('create_invitation_success_invitation_code') %}
                 <div class="px-8 py-4 bg-green-300 mt-8">
                     <p class="text-2xl">{% trans %}You have successfully created a new invitation. Please write down this invitation code, because you will no longer be able to see it{% endtrans %}:</p>
@@ -61,16 +63,34 @@
                 </div>
             {% endfor %}
             {% if app.user.invitations[1] is not empty %}
-                {# TODO: declination #}
-                <h3 class="text-2xl font-semibold mt-6">{% trans %}Active invitations{% endtrans %} ({{ app.user.invitations[1]|length }}):</h3>
-                <ul class="mt-2 space-y-3 flex flex-col float-left">
-                    {% for i, invitation in user_invitations %}
-                        <li class="text-lg font-medium flex justify-between items-center">
-                            <p><span class="font-bold text-xl">#{{ i + 1 }}:</span> {% trans %}Created{% endtrans %} {{ invitation.createdAt|date("d.m.Y H:i") }}</p>
-                            <a href="{{ path('delete_invitation', {invitation_id: invitation.id}) }}" class="bg-red-500 hover:bg-red-600 py-1 px-3 ml-6 text-white rounded-full">{% trans %}Delete{% endtrans %}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
+                <div class="mt-6">
+                    <h3 class="text-2xl font-semibold">{% trans %}Active invitations{% endtrans %} ({{ app.user.invitations[1]|length }}):</h3>
+                    <div class="flex">
+                        <ul class="mt-2 space-y-3 flex flex-col float-left">
+                            {% for i, invitation in user_invitations %}
+                                <li class="text-lg font-medium flex justify-between items-center">
+                                    <p><span class="font-bold text-xl">#{{ i + 1 }}:</span> {% trans %}Created{% endtrans %} {{ invitation.createdAt|date("d.m.Y H:i") }}</p>
+                                    <a href="{{ path('delete_invitation', {invitation_id: invitation.id}) }}" class="bg-red-500 hover:bg-red-600 py-1 px-3 ml-6 text-white rounded-full">{% trans %}Delete{% endtrans %}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+            {% if invited_users_photos is not empty %}
+                <div class="mt-6">
+                    <h3 class="text-2xl font-semibold mt-6">{% trans %}You invited{% endtrans %} {% trans with {'users': invited_users_photos|length} %}invite_users{% endtrans %}:</h3>
+                    <div class="grid grid-cols-5 gap-x-4 gap-y-4 mt-4">
+                        {% for user in invited_users_photos %}
+                            <div class="flex flex-col items-center">   
+                                <a href="{{ path('user_profile', {id: user[1]}) }}">
+                                    <div class="bg-cover w-32 h-32 rounded-full" style="background-image: url({{ asset(user[0]) }})"></div>
+                                </a>
+                                <h4 class="text-lg font-bold break-words max-w-full">{{ user[2] }}</h4>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             {% endif %}
         </div>
     </main>

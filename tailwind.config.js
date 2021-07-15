@@ -25,6 +25,9 @@ module.exports = {
                 "monospace"
             ]
         },
+        minWidth: {
+            '32': '8rem'
+        },
         extend: {},
     },
     variants: {

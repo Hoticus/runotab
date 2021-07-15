@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Invitation;
 use App\Entity\Photo;
+use App\Entity\User;
 use App\Form\SelectAvatarPhotoFormType;
 use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,18 @@ class AccountSettingsController extends AbstractController
         $user_invitations = [];
         foreach ($user->getInvitations()[1] as $invitation_id) {
             $user_invitations[] = $em->getRepository(Invitation::class)->find($invitation_id);
+        }
+        $invited_users_photos = [];
+        foreach ($user->getInvitations()[2] as $invited_user_id) {
+            $invited_user = $em->getRepository(User::class)->find($invited_user_id);
+            $avatar_photo = $invited_user->getAvatarPhoto();
+            $invited_users_photos[] = [
+                $avatar_photo
+                    ? 'uploads/photos/' . $em->getRepository(Photo::class)->find($avatar_photo)->getFileName()
+                    : 'build/images/no-photo.png',
+                $invited_user_id,
+                $invited_user->getName() . ' ' . $invited_user->getSurname()
+            ];
         }
         $avatar_photo = $user->getAvatarPhoto()
             ? 'uploads/photos/' . $em->getRepository(Photo::class)->find($user->getAvatarPhoto())->getFileName()
@@ -48,7 +61,8 @@ class AccountSettingsController extends AbstractController
         return $this->render('account_settings/index.html.twig', [
             'form' => $form->createView(),
             'avatar_photo' => $avatar_photo,
-            'user_invitations' => $user_invitations
+            'user_invitations' => $user_invitations,
+            'invited_users_photos' => $invited_users_photos
         ]);
     }
 

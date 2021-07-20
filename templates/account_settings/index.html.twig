@@ -90,6 +90,10 @@
                     </div>
                 </div>
             {% endif %}
+            <hr class="my-12">
+            {# Logout #}
+            <h2 class="text-3xl font-medium text-gray-400 inline-block">{% trans %}Logout{% endtrans %}:</h2>
+            <a class="ml-6 inline-block bg-red-500 hover:bg-red-600 py-1 px-8 rounded-full text-white font-bold text-xl focus:outline-none text-center" href="{{ path('app_logout') }}">{% trans %}Log out{% endtrans %}</a>
         </div>
     </main>
 {% endblock %}

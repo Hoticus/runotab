@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Invitation;
+use App\Service\InvitationWorker;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,9 +15,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class InvitationRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private InvitationWorker $invitation_worker)
     {
         parent::__construct($registry, Invitation::class);
+    }
+
+    /**
+     * @param string $invitation_code Unhashed invitation code
+     * @return Invitation|null
+     */
+    public function findOneByInvitationCode(string $invitation_code): ?Invitation
+    {
+        return $this->_em->getRepository(Invitation::class)
+            ->findOneBy(['invitation_code' => $this->invitation_worker->hash($invitation_code)]);
     }
 
     // /**

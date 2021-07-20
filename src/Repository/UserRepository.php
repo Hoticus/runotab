@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Photo;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -34,6 +35,40 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newEncodedPassword);
         $this->_em->persist($user);
         $this->_em->flush();
+    }
+
+    /**
+     * Get the avatar photo path
+     *
+     * @param UserInterface $user
+     * @return string
+     */
+    public function getAvatarPhotoPath(UserInterface $user): string
+    {
+        $avatar_photo = $user->getAvatarPhoto();
+        return $avatar_photo
+            ? 'uploads/photos/' . $this->_em->find(Photo::class, $avatar_photo)->getFileName()
+            : 'build/images/no-photo.png';
+    }
+
+    /**
+     * Get the invited users photos
+     *
+     * @param UserInterface $user
+     * @return array
+     */
+    public function getInvitedUsersPhotos(UserInterface $user): array
+    {
+        $invited_users_photos = [];
+        foreach ($user->getInvitations()[2] as $invited_user_id) {
+            $invited_user = $this->_em->find(User::class, $invited_user_id);
+            $invited_users_photos[] = [
+                $this->getAvatarPhotoPath($invited_user),
+                $invited_user_id,
+                $invited_user->getName() . ' ' . $invited_user->getSurname()
+            ];
+        }
+        return $invited_users_photos;
     }
 
     // /**

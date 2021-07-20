@@ -5,12 +5,12 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\PasswordRecoveryFirstFormType;
 use App\Form\PasswordRecoverySecondFormType;
+use App\Service\EmailSender;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,39 +19,30 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthController extends AbstractController
 {
-    private $translator;
+    private $session;
 
-    public function __construct(TranslatorInterface $translator)
+    public function __construct(private TranslatorInterface $translator, RequestStack $request_stack)
     {
-        $this->translator = $translator;
+        $this->session = $request_stack->getSession();
     }
 
-    /**
-     * @Route("/login", name="app_login")
-     */
+    #[Route('/login', name: 'app_login')]
     public function login(
-        AuthenticationUtils $authenticationUtils
+        AuthenticationUtils $authentication_utils
     ): Response {
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
+        $error = $authentication_utils->getLastAuthenticationError();
+        $last_username = $authentication_utils->getLastUsername();
 
-        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        return $this->render('security/login.html.twig', ['last_username' => $last_username, 'error' => $error]);
     }
 
-    /**
-     * @Route("/logout", name="app_logout")
-     */
+    #[Route('/logout', name: 'app_logout')]
     public function logout()
     {
-        throw new \Exception('Please try again later');
     }
 
-    /**
-     * @Route("/restore/password", name="app_restore_password_first")
-     */
-    public function restorePasswordFirst(Request $request, SessionInterface $session, MailerInterface $mailer)
+    #[Route('/restore/password', name: 'app_restore_password_first')]
+    public function restorePasswordFirst(Request $request, EmailSender $email_sender)
     {
         $form = $this->createForm(PasswordRecoveryFirstFormType::class);
         $form->handleRequest($request);
@@ -70,7 +61,7 @@ class AuthController extends AbstractController
             for ($i = 1; $i <= 6; $i++) {
                 $recovery_code .= random_int(0, 9);
             }
-            $session->set('recovery_code', $recovery_code);
+            $this->session->set('recovery_code', $recovery_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -81,10 +72,9 @@ class AuthController extends AbstractController
                     'recovery_code' => $recovery_code,
                     'full_name' => $user->getName() . " " . $user->getSurname()
                 ]);
-            $mailer->send($email);
+            $email_sender->send($email);
 
-            $session->set('email_sending_cooldown_end', time() + 60);
-            $session->set('password_recovery_email', $user->getEmail());
+            $this->session->set('password_recovery_email', $user->getEmail());
 
             return $this->redirectToRoute('app_restore_password_second');
         }
@@ -94,16 +84,13 @@ class AuthController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/restore/password/confirm", name="app_restore_password_second")
-     */
+    #[Route('/restore/password/confirm', name: 'app_restore_password_second')]
     public function restorePasswordSecond(
         Request $request,
-        SessionInterface $session,
         UserPasswordHasherInterface $password_encoder,
-        MailerInterface $mailer
+        EmailSender $email_sender
     ) {
-        if (!$email = $session->get('password_recovery_email')) {
+        if (!$email = $this->session->get('password_recovery_email')) {
             return $this->redirectToRoute('app_restore_password_first');
         }
 
@@ -115,8 +102,7 @@ class AuthController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
 
-            if ($form->get('recovery_code')->getData() == $session->get('recovery_code')) {
-                // encode the plain password
+            if ($form->get('recovery_code')->getData() == $this->session->get('recovery_code')) {
                 $user->setPassword(
                     $password_encoder->hashPassword(
                         $user,
@@ -125,21 +111,21 @@ class AuthController extends AbstractController
                 );
                 $em->flush();
 
-                $session->remove('recovery_code');
-                $session->remove('password_recovery_email');
-                $session->remove('email_sending_cooldown_end');
+                $this->session->remove('recovery_code');
+                $this->session->remove('password_recovery_email');
+                $email_sender->removeEmailSendingCooldownEnd();
 
                 $this->addFlash('login_notice', 'Your password has been successfully changed.');
 
                 return $this->redirectToRoute('app_login');
             }
 
-            if ($session->get('email_sending_cooldown_end') < time()) {
+            if ($email_sender->getEmailSendingCooldownEnd() < time()) {
                 $recovery_code = "";
                 for ($i = 1; $i <= 6; $i++) {
                     $recovery_code .= random_int(0, 9);
                 }
-                $session->set('recovery_code', $recovery_code);
+                $this->session->set('recovery_code', $recovery_code);
 
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -150,8 +136,7 @@ class AuthController extends AbstractController
                         'recovery_code' => $recovery_code,
                         'full_name' => $user->getName() . " " . $user->getSurname()
                     ]);
-                $mailer->send($email);
-                $session->set('email_sending_cooldown_end', time() + 60);
+                $email_sender->send($email);
 
                 $this->addFlash(
                     'password_recovery_second_error',
@@ -175,29 +160,26 @@ class AuthController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/restore/password/resend", name="app_resend_password_recovery_mail")
-     */
-    public function resendPasswordRecoveryMail(SessionInterface $session, MailerInterface $mailer)
+    #[Route('/restore/password/resend', name: 'app_resend_password_recovery_mail')]
+    public function resendPasswordRecoveryMail(EmailSender $email_sender)
     {
-        $password_recovery_email = $session->get('password_recovery_email');
+        $password_recovery_email = $this->session->get('password_recovery_email');
 
         $em = $this->getDoctrine()->getManager();
         $user = $em->getRepository(User::class)->findOneBy(['email' => $password_recovery_email]);
 
-        $recovery_code = $session->get('recovery_code');
-        $email_sending_cooldown_end = $session->get('email_sending_cooldown_end');
+        $recovery_code = $this->session->get('recovery_code');
 
         if (!$user || !$recovery_code) {
             return $this->redirectToRoute('app_restore_password_first');
         }
 
-        if ($email_sending_cooldown_end < time()) {
+        if ($email_sender->getEmailSendingCooldownEnd() < time()) {
             $recovery_code = "";
             for ($i = 1; $i <= 6; $i++) {
                 $recovery_code .= random_int(0, 9);
             }
-            $session->set('recovery_code', $recovery_code);
+            $this->session->set('recovery_code', $recovery_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -208,8 +190,7 @@ class AuthController extends AbstractController
                     'recovery_code' => $recovery_code,
                     'full_name' => $user->getName() . " " . $user->getSurname()
                 ]);
-            $mailer->send($email);
-            $session->set('email_sending_cooldown_end', time() + 60);
+            $email_sender->send($email);
 
             $this->addFlash(
                 'password_recovery_second_notice',

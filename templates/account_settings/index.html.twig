@@ -81,13 +81,11 @@
                 <div class="mt-6">
                     <h3 class="text-2xl font-semibold mt-6">{% trans %}You invited{% endtrans %} {% trans with {'users': invited_users_photos|length} %}invite_users{% endtrans %}:</h3>
                     <div class="grid grid-cols-5 gap-x-4 gap-y-4 mt-4">
-                        {% for user in invited_users_photos %}
-                            <div class="flex flex-col items-center">   
-                                <a href="{{ path('user_profile', {id: user[1]}) }}">
-                                    <div class="bg-cover w-32 h-32 rounded-full" style="background-image: url({{ asset(user[0]) }})"></div>
-                                </a>
+                        {% for user in invited_users_photos %} 
+                            <a class="flex flex-col items-center" href="{{ path('user_profile', {id: user[1]}) }}">
+                                <div class="bg-cover w-32 h-32 rounded-full" style="background-image: url({{ asset(user[0]) }})"></div>
                                 <h4 class="text-lg font-bold break-words max-w-full">{{ user[2] }}</h4>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 </div>

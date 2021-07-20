@@ -25,6 +25,7 @@ class LocaleSubscriber implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
+        // set timezone to twig from cookies
         if ($user_timezone = $request->cookies->get('timezone')) {
             $this->twig->getExtension(CoreExtension::class)->setTimezone($user_timezone);
         }
@@ -55,6 +56,7 @@ class LocaleSubscriber implements EventSubscriberInterface
     public function onSecurityInteractiveLogin(InteractiveLoginEvent $event)
     {
         $request = $event->getRequest();
+        // set locale from DB
         $request->getSession()->set('_locale', $event->getAuthenticationToken()->getUser()->getLocale());
     }
 

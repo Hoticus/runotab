@@ -6,12 +6,13 @@ use App\Entity\Invitation;
 use App\Entity\User;
 use App\Form\EmailVerificationFormType;
 use App\Form\RegistrationFormType;
+use App\Service\EmailSender;
+use App\Service\InvitationWorker;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,20 +23,17 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
-    private $mailer;
     private $session;
-    private $translator;
 
-    public function __construct(MailerInterface $mailer, RequestStack $request_stack, TranslatorInterface $translator)
-    {
-        $this->mailer = $mailer;
+    public function __construct(
+        private EmailSender $email_sender,
+        private TranslatorInterface $translator,
+        RequestStack $request_stack
+    ) {
         $this->session = $request_stack->getSession();
-        $this->translator = $translator;
     }
 
-    /**
-     * @Route("/register", name="app_register")
-     */
+    #[Route('/register', name: 'app_register')]
     public function register(
         Request $request,
         UserPasswordHasherInterface $password_encoder
@@ -48,18 +46,15 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (
-                !$this->getDoctrine()->getRepository(Invitation::class)
-                    ->findOneBy(['invitation_code' => $invitation_code = hash("sha256", str_replace(
-                        '-',
-                        '',
-                        $form->get('invitationCode')->getData()
-                    ))])
+                !$invitation = $this->getDoctrine()->getRepository(Invitation::class)->findOneByInvitationCode(
+                    str_replace('-', '', $form->get('invitationCode')->getData())
+                )
             ) {
                 $this->addFlash('registration_error', 'Please enter a valid invitation code.');
 
                 return $this->redirectToRoute('app_register');
             }
-            $this->session->set('invitation_code', $invitation_code);
+            $this->session->set('invitation_code', $invitation->getInvitationCode());
 
             $user->setPassword(
                 $password_encoder->hashPassword(
@@ -83,8 +78,7 @@ class RegistrationController extends AbstractController
                     'verification_code' => $verification_code,
                     'full_name' => $user->getName() . " " . $user->getSurname()
                 ]);
-            $this->mailer->send($email);
-            $this->session->set('email_sending_cooldown_end', time() + 60);
+            $this->email_sender->send($email);
 
             return $this->redirectToRoute(
                 'app_verify_email'
@@ -97,13 +91,12 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/verify/email", name="app_verify_email")
-     */
+    #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(
         Request $request,
         TokenStorageInterface $token_storage,
-        RememberMeHandlerInterface $remember_me
+        RememberMeHandlerInterface $remember_me,
+        InvitationWorker $invitation_worker
     ) {
         $user = $this->session->get('user');
         $verification_code = $this->session->get('verification_code');
@@ -124,7 +117,7 @@ class RegistrationController extends AbstractController
 
                 $this->session->remove('user');
                 $this->session->remove('verification_code');
-                $this->session->remove('email_sending_cooldown_end');
+                $this->email_sender->removeEmailSendingCooldownEnd();
                 $this->session->remove('invitation_code');
 
                 if (!$invitation) {
@@ -133,25 +126,10 @@ class RegistrationController extends AbstractController
                     return $this->redirectToRoute('app_register');
                 }
 
-                $user->setInvitedBy($invitation->getCreatedBy());
-                if ($invited_by = $em->getRepository(User::class)->find($invitation->getCreatedBy())) {
-                    $invited_by_user_invitations = $invited_by->getInvitations();
-                    unset($invited_by_user_invitations[1][array_search(
-                        $invitation->getId(),
-                        $invited_by_user_invitations[1]
-                    )]);
-                    $invited_by_user_invitations[1] = array_values($invited_by_user_invitations[1]);
-                    $user->setRating(floor($invited_by->getRating() / 2));
-                    $user->setInvitations([floor($invited_by->getRating() / 2), [], []]);
-                }
                 $user->setLocale($request->getLocale());
                 $this->session->set('_locale', $request->getLocale());
 
-                $em->persist($user);
-                $em->remove($invitation);
-                $invited_by_user_invitations[2][] = $user->getId();
-                $invited_by->setInvitations($invited_by_user_invitations);
-                $em->flush();
+                $user = $invitation_worker->use($invitation, $user);
 
                 $token = new PostAuthenticationToken($user, 'main', $user->getRoles());
                 $token_storage->setToken($token);
@@ -161,7 +139,7 @@ class RegistrationController extends AbstractController
                 return $this->redirectToRoute('default');
             }
 
-            if ($this->session->get('email_sending_cooldown_end') < time()) {
+            if ($this->email_sender->getEmailSendingCooldownEnd() < time()) {
                 $verification_code = "";
                 for ($i = 1; $i <= 6; $i++) {
                     $verification_code .= random_int(0, 9);
@@ -177,8 +155,7 @@ class RegistrationController extends AbstractController
                         'verification_code' => $verification_code,
                         'full_name' => $user->getName() . " " . $user->getSurname()
                     ]);
-                $this->mailer->send($email);
-                $this->session->set('email_sending_cooldown_end', time() + 60);
+                $this->email_sender->send($email);
 
                 $this->addFlash(
                     'email_verification_error',
@@ -202,20 +179,17 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/verify/email/resend", name="app_resend_verification_mail")
-     */
+    #[Route('/verify/email/resend', name: 'app_resend_verification_mail')]
     public function resendVerififcationMail()
     {
         $user = $this->session->get('user');
         $verification_code = $this->session->get('verification_code');
-        $email_sending_cooldown_end = $this->session->get('email_sending_cooldown_end');
 
         if (!$user || !$verification_code) {
             return $this->redirectToRoute('app_register');
         }
 
-        if ($email_sending_cooldown_end < time()) {
+        if ($this->email_sender->getEmailSendingCooldownEnd() < time()) {
             $verification_code = "";
             for ($i = 1; $i <= 6; $i++) {
                 $verification_code .= random_int(0, 9);
@@ -231,8 +205,7 @@ class RegistrationController extends AbstractController
                     'verification_code' => $verification_code,
                     'full_name' => $user->getName() . " " . $user->getSurname()
                 ]);
-            $this->mailer->send($email);
-            $this->session->set('email_sending_cooldown_end', time() + 60);
+            $this->email_sender->send($email);
 
             $this->addFlash(
                 'email_verification_notice',

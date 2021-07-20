@@ -12,16 +12,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AppController extends AbstractController
 {
-    /**
-     * @Route("/app/set/timezone", name="app_set_timezone")
-     */
+    #[Route('/app/set/timezone', name: 'app_set_timezone')]
     public function setTimezone(Request $request): Response
     {
         $timezone = $request->query->get('timezone');
         $return = $request->query->get('return');
 
         if ($return && Timezones::exists($timezone)) {
-            $timezone_cookie = Cookie::create('timezone')->withValue($timezone);
+            $timezone_cookie = Cookie::create('timezone')->withValue($timezone)->withSecure();
             $response = new Response();
             $response->headers->setCookie($timezone_cookie);
             $response->send();

@@ -6,7 +6,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class FileUploader
+class FileWorker
 {
     /**
      * Upload a file
@@ -32,6 +32,7 @@ class FileUploader
                 switch ($file_mime) {
                     case 'image/jpeg':
                         $image = imagecreatefromjpeg($target_directory . '/' . $filename);
+                        // fixing orientation
                         $exif = exif_read_data($target_directory . '/' . $filename);
                         if ($image && $exif && isset($exif['Orientation'])) {
                             $ort = $exif['Orientation'];

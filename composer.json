@@ -49,6 +49,8 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^6.6",
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "^5.3",
         "symfony/css-selector": "^5.3",
@@ -91,6 +93,12 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "reload-test-db": [
+            "@php bin/console --env=test doctrine:database:drop --force",
+            "@php bin/console --env=test doctrine:database:create",
+            "@php bin/console --env=test doctrine:schema:create",
+            "@php bin/console --env=test doctrine:fixtures:load -n"
         ]
     },
     "conflict": {

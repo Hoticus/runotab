@@ -65,9 +65,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $rating = 0;
 
     /**
+     * [$can_invite = 0, $created_invitations_ids = [], $invited_users_ids = []]
+     *
      * @ORM\Column(type="json")
      */
-    private $invitations = [0, []];
+    private $invitations = [0, [], []];
 
     /**
      * @ORM\Column(type="integer")
@@ -239,6 +241,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->invitations;
     }
 
+    /**
+     * @param array $invitations [$can_invite = 0, $created_invitations_ids = [], $invited_users_ids = []]
+     */
     public function setInvitations(array $invitations): self
     {
         $this->invitations = $invitations;

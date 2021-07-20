@@ -34,13 +34,13 @@
                 <a class="mx-auto" href="{{ path('app_resend_verification_mail') }}">{% trans %}Didn't get the letter?{% endtrans %}</a>
             {{ form_end(emailVerificationForm) }}
             <script>
-                var verification_code = document.getElementById("email_verification_form_verification_code");
-                var events = ['input', 'change', 'blur', 'keyup'];
-                for (var i in events) {
+                const verification_code = document.getElementById("email_verification_form_verification_code");
+                const events = ['input', 'change', 'blur', 'keyup'];
+                for (let i in events) {
                     verification_code.addEventListener(events[i], format, false);
                 }
                 function format() {
-                    var formatted_code = this.value.toUpperCase();
+                    let formatted_code = this.value.toUpperCase();
                     formatted_code = formatted_code.replace(/[^0-9]/g, "").substring(0, 6);
                     this.value = formatted_code;
                 }

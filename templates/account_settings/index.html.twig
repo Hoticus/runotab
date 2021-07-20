@@ -2,6 +2,14 @@
 
 {% block title %}{% trans %}Account settings{% endtrans %}{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        const photo_selected_text = "{{ 'A new photo is selected'|trans({}, 'validators') }}";
+    </script>
+    {{ encore_entry_script_tags('accountSettings') }}
+{% endblock %}
+
 {% block main %}
     <main class="mt-16">
         <div class="container mx-auto">
@@ -17,35 +25,6 @@
 
                 <button type="submit" id="select_avatar_photo_form_submit" class="hidden ml-6 bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl w-1/6 mx-auto focus:outline-none">{% trans %}Save{% endtrans %}</button>
             {{ form_end(form) }}
-            <script>
-                const select_avatar = document.getElementById('select_avatar_photo_form_photo');
-                const select_avatar_label = document.getElementById('select_avatar_photo_form_photo_label');
-                const select_avatar_submit = document.getElementById('select_avatar_photo_form_submit');
-                const select_avatar_label_value = document.getElementById('select_avatar_photo_form_photo_label').innerText;
-                const current_avatar = document.getElementById('current_avatar');
-                
-                select_avatar.addEventListener('change', function (e) {
-                    let file_chosen = false;
-                    if (this.files) {
-                        file_chosen = true;
-                        if (this.files[0].type.startsWith('image/')){
-                            let reader = new FileReader();
-                            reader.onload = function (e) {
-                                current_avatar.style.backgroundImage = "url(" + e.target.result + ")";
-                            }
-                            reader.readAsDataURL(this.files[0]);
-                        }
-                    }
-
-                    if (file_chosen) {
-                        select_avatar_label.innerText = "{{ 'A new photo is selected'|trans({}, 'validators') }}";
-                        select_avatar_submit.classList.remove('hidden');
-                    } else {
-                        select_avatar_label.innerText = select_avatar_label_value;
-                        select_avatar_submit.classList.add('hidden');
-                    }
-                });
-            </script>
             <hr class="my-12">
             {# Invitations #}
             <h2 class="text-3xl font-medium text-gray-400 mb-4">{% trans %}Invitations{% endtrans %}:</h2>

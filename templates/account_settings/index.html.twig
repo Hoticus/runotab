@@ -19,19 +19,26 @@
                 <div id="current_avatar" class="bg-cover w-32 h-32 rounded-full mr-8 min-w-32" style="background-image: url({{ asset(avatar_photo) }})"></div>
                 <h3 class="text-4xl max-w-full break-words font-semibold">{{ app.user.name ~ " " ~ app.user.surname }}</h3>
             </div>
-            {{ form_start(form) }}
-                {{ form_widget(form.photo, {'attr': {'class': 'hidden'}}) }}
-                {{ form_label(form.photo, 'Select a new photo', {'label_attr': {'class': 'rounded-full bg-gray-500 hover:bg-gray-600 cursor-pointer py-1 w-1/6 inline-block text-xl font-bold text-center text-white'}}) }}
+            {{ form_start(select_avatar_photo_form, {'attr': {'class': 'inline'}}) }}
+                {{ form_widget(select_avatar_photo_form.photo, {'attr': {'class': 'hidden'}}) }}
+                {{ form_label(select_avatar_photo_form.photo, 'Select a new photo', {'label_attr': {'class': 'rounded-full bg-gray-500 hover:bg-gray-600 cursor-pointer py-1 w-1/6 inline-block text-xl font-bold text-center text-white'}}) }}
 
                 <button type="submit" id="select_avatar_photo_form_submit" class="hidden ml-6 bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl w-1/6 mx-auto focus:outline-none">{% trans %}Save{% endtrans %}</button>
-            {{ form_end(form) }}
+            {{ form_end(select_avatar_photo_form) }}
+            {% if app.user.avatarPhoto %}
+                {{ form_start(delete_avatar_photo_form, {'attr': {'class': 'inline'}}) }}
+                    <button type="submit" id="select_avatar_photo_form_submit" class="ml-6 bg-red-500 hover:bg-red-600 py-1 rounded-full text-white font-bold text-xl w-1/6 mx-auto focus:outline-none">{% trans %}Delete{% endtrans %}</button>
+                {{ form_end(delete_avatar_photo_form) }}
+            {% endif %}
             <hr class="my-12">
             {# Invitations #}
             <h2 class="text-3xl font-medium text-gray-400 mb-4">{% trans %}Invitations{% endtrans %}:</h2>
             <div>
                 <h3 class="text-2xl font-semibold inline-block">{% trans %}You can invite{% endtrans %} {% trans with {'users': app.user.invitations[0]} %}invite_users{% endtrans %}</h3>
                 {% if app.user.invitations[0] > 0 %}
-                    <a class="ml-6 inline-block bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl focus:outline-none w-1/5 text-center" href="{{ path('create_invitation') }}">{% trans %}Create an invitation{% endtrans %}</a>
+                    {{ form_start(create_invitation_form, {'attr': {'class': 'inline'}}) }}
+                        <button type="submit" class="ml-6 bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl focus:outline-none w-1/5 text-center">{% trans %}Create an invitation{% endtrans %}</button>
+                    {{ form_end(create_invitation_form) }}
                 {% endif %}
             </div>
             {% for flashCode in app.flashes('create_invitation_success_invitation_code') %}

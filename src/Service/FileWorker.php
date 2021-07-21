@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Exception;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -63,5 +64,17 @@ class FileWorker
         }
 
         return $filename;
+    }
+
+    /**
+     * Delete a file
+     *
+     * @param string $file_path
+     * @return void
+     */
+    public function delete(string $file_path): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($file_path);
     }
 }

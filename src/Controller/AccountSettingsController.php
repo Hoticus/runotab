@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AccountSettingsController extends AbstractController
 {
     #[Route('/account/settings', name: 'account_settings')]
-    public function index(Request $request, PhotoWorker $photo_worker): Response
+    public function index(Request $request, PhotoWorker $photo_worker, InvitationWorker $invitation_worker): Response
     {
         $user = $this->getUser();
         $em = $this->getDoctrine()->getManager();
@@ -30,11 +30,11 @@ class AccountSettingsController extends AbstractController
         $avatar_photo = $users->getAvatarPhotoPath($user);
 
         $photo = new Photo();
-        $form = $this->createForm(SelectAvatarPhotoFormType::class, $photo);
-        $form->handleRequest($request);
+        $select_avatar_photo_form = $this->createForm(SelectAvatarPhotoFormType::class, $photo);
+        $select_avatar_photo_form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $photo = $photo_worker->upload($photo, $form->get('photo')->getData());
+        if ($select_avatar_photo_form->isSubmitted() && $select_avatar_photo_form->isValid()) {
+            $photo = $photo_worker->upload($photo, $select_avatar_photo_form->get('photo')->getData());
 
             $user->setAvatarPhoto($photo->getId());
             $em->flush();
@@ -42,25 +42,41 @@ class AccountSettingsController extends AbstractController
             return $this->redirectToRoute('account_settings');
         }
 
+        $delete_avatar_photo_form = $this->get('form.factory')->createNamedBuilder('delete_avatar_photo_form')
+            ->getForm();
+        $delete_avatar_photo_form->handleRequest($request);
+
+        if ($delete_avatar_photo_form->isSubmitted() && $delete_avatar_photo_form->isValid()) {
+            $photo_worker->delete($em->find(Photo::class, $user->getAvatarPhoto()));
+
+            $user->setAvatarPhoto(null);
+            $em->flush();
+
+            return $this->redirectToRoute('account_settings');
+        }
+
+        $create_invitation_form = $this->get('form.factory')->createNamedBuilder('create_invitation_form')->getForm();
+        $create_invitation_form->handleRequest($request);
+
+        if ($create_invitation_form->isSubmitted() && $create_invitation_form->isValid()) {
+            if ($invitation_code = $invitation_worker->create($this->getUser())) {
+                $this->addFlash(
+                    'create_invitation_success_invitation_code',
+                    substr(chunk_split($invitation_code, 4, '-'), 0, -1)
+                );
+            }
+
+            return $this->redirectToRoute('account_settings');
+        }
+
         return $this->render('account_settings/index.html.twig', [
-            'form' => $form->createView(),
+            'select_avatar_photo_form' => $select_avatar_photo_form->createView(),
+            'delete_avatar_photo_form' => $delete_avatar_photo_form->createView(),
+            'create_invitation_form' => $create_invitation_form->createView(),
             'avatar_photo' => $avatar_photo,
             'user_invitations' => $user_invitations,
             'invited_users_photos' => $invited_users_photos
         ]);
-    }
-
-    #[Route('/account/settings/create/invitation', name: 'create_invitation')]
-    public function createInvitation(InvitationWorker $invitation_worker): Response
-    {
-        if ($invitation_code = $invitation_worker->create($this->getUser())) {
-            $this->addFlash(
-                'create_invitation_success_invitation_code',
-                substr(chunk_split($invitation_code, 4, '-'), 0, -1)
-            );
-        }
-
-        return $this->redirectToRoute('account_settings');
     }
 
     #[Route('/account/settings/delete/invitation/{invitation_id<\d+>}', name: 'delete_invitation')]

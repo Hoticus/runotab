@@ -16,6 +16,13 @@ class PhotoWorker
     ) {
     }
 
+    /**
+     * Create and upload a photo
+     *
+     * @param Photo $photo
+     * @param UploadedFile $photo_file
+     * @return Photo
+     */
     public function upload(Photo $photo, UploadedFile $photo_file): Photo
     {
         $photo_filename = $this->file_worker->upload($photo_file, $this->params->get('photos_directory'));
@@ -24,5 +31,18 @@ class PhotoWorker
         $this->em->flush();
 
         return $photo;
+    }
+
+    /**
+     * Delete a photo
+     *
+     * @param Photo $photo
+     * @return void
+     */
+    public function delete(Photo $photo): void
+    {
+        $this->file_worker->delete($this->params->get('photos_directory') . '/' . $photo->getFileName());
+        $this->em->remove($photo);
+        $this->em->flush();
     }
 }

@@ -36,6 +36,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
         $supported_locales = explode("|", $this->parameter_bag->get('app.supported_locales'));
         $user_browser_locales = $request->getLanguages();
+        $user_browser_locale = null;
 
         foreach ($user_browser_locales as $user_browser_locale) {
             if (in_array($user_browser_locale, $supported_locales)) {

@@ -6,6 +6,7 @@ use App\Entity\Invitation;
 use App\Entity\Photo;
 use App\Entity\User;
 use App\Form\SelectAvatarPhotoFormType;
+use App\Form\SelectLanguageFormType;
 use App\Service\InvitationWorker;
 use App\Service\PhotoWorker;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -69,10 +70,26 @@ class AccountSettingsController extends AbstractController
             return $this->redirectToRoute('account_settings');
         }
 
+        $select_language_form = $this->createForm(
+            SelectLanguageFormType::class,
+            options: ['user_locale' => $user->getLocale()]
+        );
+        $select_language_form->handleRequest($request);
+
+        if ($select_language_form->isSubmitted() && $select_language_form->isValid()) {
+            $locale = $select_language_form->get('language')->getData();
+            $request->getSession()->set('_locale', $locale);
+            $user->setLocale($locale);
+            $em->flush();
+
+            return $this->redirectToRoute('account_settings');
+        }
+
         return $this->render('account_settings/index.html.twig', [
             'select_avatar_photo_form' => $select_avatar_photo_form->createView(),
             'delete_avatar_photo_form' => $delete_avatar_photo_form->createView(),
             'create_invitation_form' => $create_invitation_form->createView(),
+            'select_language_form' => $select_language_form->createView(),
             'avatar_photo' => $avatar_photo,
             'user_invitations' => $user_invitations,
             'invited_users_photos' => $invited_users_photos

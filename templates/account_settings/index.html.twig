@@ -77,6 +77,13 @@
                 </div>
             {% endif %}
             <hr class="my-12">
+            {# Language #}
+            <h2 class="text-3xl font-medium text-gray-400 inline-block">{% trans %}Language{% endtrans %}:</h2>
+            {{ form_start(select_language_form, {'attr': {'class': 'inline'}}) }}
+                {{ form_widget(select_language_form.language, {'attr': {'class': 'cursor-pointer ml-6 rounded-full border-blue-400 focus:border-blue-500 focus:ring-0 focus:outline-none'}}) }}
+                <button type="submit" class="ml-6 bg-blue-400 hover:bg-blue-500 py-1 rounded-full text-white font-bold text-xl focus:outline-none px-8 text-center">{% trans %}Save{% endtrans %}</button>
+            {{ form_end(select_language_form) }}
+            <hr class="my-12">
             {# Logout #}
             <h2 class="text-3xl font-medium text-gray-400 inline-block">{% trans %}Logout{% endtrans %}:</h2>
             <a class="ml-6 inline-block bg-red-500 hover:bg-red-600 py-1 px-8 rounded-full text-white font-bold text-xl focus:outline-none text-center" href="{{ path('app_logout') }}">{% trans %}Log out{% endtrans %}</a>

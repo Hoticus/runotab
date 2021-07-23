@@ -5,7 +5,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        const photo_selected_text = "{{ 'A new photo is selected'|trans({}, 'validators') }}";
+        const photo_selected_text = "{{ 'A new photo is selected'|trans }}";
     </script>
     {{ encore_entry_script_tags('accountSettings') }}
 {% endblock %}

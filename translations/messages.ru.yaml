@@ -1,6 +1,12 @@
+A new photo is selected: Новое фото выбрано
+Account settings: Настройки аккаунта
+Active invitations: Активные приглашения
 Already have an account?: Уже есть аккаунт?
 Confirm Password: Подтвердить Пароль
 Continue: Продолжить
+Create an invitation: Создать приглашение
+Created: Создано
+Delete: Удалить
 Didn't get the letter?: Не получили письмо?
 Don't have an account?: Нет аккаунта?
 Email Confirmation: Подтверждение Электронной Почты
@@ -11,9 +17,13 @@ Forgot your password?: Забыли пароль?
 If you have not tried to register, then ignore this email.: Если вы не пытались зарегистрироваться, проигнорируйте это письмо.
 If you have not tried to restore password, then ignore this email.: Если вы не пытались восстановить пароль, проигнорируйте это письмо.
 Invitation code: Пригласительный код
+Invitations: Приглашения
+Language: Язык
 Log in Runotab!: Войти в Runotab!
 Log in: Войти
+Log out: Выйти
 Login: Вход
+Logout: Выход
 Name: Имя
 New Password: Новый Пароль
 Password Recovery: Восстановление Пароля
@@ -22,6 +32,8 @@ Password: Пароль
 Please enter the 6-digit code that we sent to your email address and new password.: Пожалуйста, введите 6-значный код, который мы отправили на ваш адрес электронной почты, и новый пароль.
 Please enter the 6-digit code that we sent to your email address.: Пожалуйста, введите 6-значный код, который мы отправили на ваш адрес электронной почты.
 Please enter the email address of the account you want to restore.: Пожалуйста, введите адрес электронной почты аккаунта, который вы хотите восстановить.
+Profile settings: Настройки профиля
+Profile: Профиль
 Register: Зарегистрироваться
 Registration in Runotab: Регистрация в Runotab
 Registration: Регистрация
@@ -29,6 +41,9 @@ Restore Password: Восстановить Пароль
 Restore: Восстановить
 Runotab administration: администрация Runotab
 Runotab is a closed social network, so you need to have an invitation code to register.: Runotab - закрытая социальная сеть, поэтому вам нужен пригласительный код, чтобы зарегистрироваться.
+Save: Сохранить
+Select a new photo: Выбрать новое фото
+Settings: Настройки
 Sincerely: С уважением
 Surname: Фамилия
 To continue registering in Runotab, use this code: Чтобы продолжить регистрацию в Runotab, используйте этот код
@@ -36,3 +51,6 @@ To continue restoring password in Runotab, use this code: Чтобы продо�
 Verify Email: Подтвердить Электронную Почту
 Verify: Потдвердить
 Welcome to Runotab - a social network for ours!: Добро пожаловать в Runotab - социальная сеть для своих!
+You can invite: Вы можете пригласить
+You have successfully created a new invitation. Please write down this invitation code, because you will no longer be able to see it: Вы успешно создали новое приглашение. Пожалуйста, запишите этот код приглашения, потому что вы больше больше не сможете его увидеть
+You invited: Вы пригласили

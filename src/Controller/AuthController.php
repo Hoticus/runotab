@@ -9,7 +9,6 @@ use App\Service\EmailSender;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -19,11 +18,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthController extends AbstractController
 {
-    private $session;
-
-    public function __construct(private TranslatorInterface $translator, RequestStack $request_stack)
+    public function __construct(private TranslatorInterface $translator)
     {
-        $this->session = $request_stack->getSession();
     }
 
     #[Route('/login', name: 'app_login')]
@@ -61,7 +57,7 @@ class AuthController extends AbstractController
             for ($i = 1; $i <= 6; $i++) {
                 $recovery_code .= random_int(0, 9);
             }
-            $this->session->set('recovery_code', $recovery_code);
+            $request->getSession()->set('recovery_code', $recovery_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -74,7 +70,7 @@ class AuthController extends AbstractController
                 ]);
             $email_sender->send($email);
 
-            $this->session->set('password_recovery_email', $user->getEmail());
+            $request->getSession()->set('password_recovery_email', $user->getEmail());
 
             return $this->redirectToRoute('app_restore_password_second');
         }
@@ -90,7 +86,7 @@ class AuthController extends AbstractController
         UserPasswordHasherInterface $password_encoder,
         EmailSender $email_sender
     ) {
-        if (!$email = $this->session->get('password_recovery_email')) {
+        if (!$email = $request->getSession()->get('password_recovery_email')) {
             return $this->redirectToRoute('app_restore_password_first');
         }
 
@@ -102,7 +98,7 @@ class AuthController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
 
-            if ($form->get('recovery_code')->getData() == $this->session->get('recovery_code')) {
+            if ($form->get('recovery_code')->getData() == $request->getSession()->get('recovery_code')) {
                 $user->setPassword(
                     $password_encoder->hashPassword(
                         $user,
@@ -111,8 +107,8 @@ class AuthController extends AbstractController
                 );
                 $em->flush();
 
-                $this->session->remove('recovery_code');
-                $this->session->remove('password_recovery_email');
+                $request->getSession()->remove('recovery_code');
+                $request->getSession()->remove('password_recovery_email');
                 $email_sender->removeEmailSendingCooldownEnd();
 
                 $this->addFlash('login_notice', 'Your password has been successfully changed.');
@@ -125,7 +121,7 @@ class AuthController extends AbstractController
                 for ($i = 1; $i <= 6; $i++) {
                     $recovery_code .= random_int(0, 9);
                 }
-                $this->session->set('recovery_code', $recovery_code);
+                $request->getSession()->set('recovery_code', $recovery_code);
 
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -161,14 +157,14 @@ class AuthController extends AbstractController
     }
 
     #[Route('/restore/password/resend', name: 'app_resend_password_recovery_mail')]
-    public function resendPasswordRecoveryMail(EmailSender $email_sender)
+    public function resendPasswordRecoveryMail(Request $request, EmailSender $email_sender)
     {
-        $password_recovery_email = $this->session->get('password_recovery_email');
+        $password_recovery_email = $request->getSession()->get('password_recovery_email');
 
         $em = $this->getDoctrine()->getManager();
         $user = $em->getRepository(User::class)->findOneBy(['email' => $password_recovery_email]);
 
-        $recovery_code = $this->session->get('recovery_code');
+        $recovery_code = $request->getSession()->get('recovery_code');
 
         if (!$user || !$recovery_code) {
             return $this->redirectToRoute('app_restore_password_first');
@@ -179,7 +175,7 @@ class AuthController extends AbstractController
             for ($i = 1; $i <= 6; $i++) {
                 $recovery_code .= random_int(0, 9);
             }
-            $this->session->set('recovery_code', $recovery_code);
+            $request->getSession()->set('recovery_code', $recovery_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))

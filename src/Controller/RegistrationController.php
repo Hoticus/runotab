@@ -23,14 +23,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
-    private $session;
-
     public function __construct(
         private EmailSender $email_sender,
         private TranslatorInterface $translator,
-        RequestStack $request_stack
     ) {
-        $this->session = $request_stack->getSession();
     }
 
     #[Route('/register', name: 'app_register')]
@@ -39,7 +35,7 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $password_encoder
     ): Response {
         $user = new User();
-        $this->session->set('user', $user);
+        $request->getSession()->set('user', $user);
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
         $first_form_error = isset($form->getErrors(true)[0]) ? $form->getErrors(true)[0]->getMessage() : null;
@@ -54,7 +50,7 @@ class RegistrationController extends AbstractController
 
                 return $this->redirectToRoute('app_register');
             }
-            $this->session->set('invitation_code', $invitation->getInvitationCode());
+            $request->getSession()->set('invitation_code', $invitation->getInvitationCode());
 
             $user->setPassword(
                 $password_encoder->hashPassword(
@@ -67,7 +63,7 @@ class RegistrationController extends AbstractController
             for ($i = 1; $i <= 6; $i++) {
                 $verification_code .= random_int(0, 9);
             }
-            $this->session->set('verification_code', $verification_code);
+            $request->getSession()->set('verification_code', $verification_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -98,8 +94,8 @@ class RegistrationController extends AbstractController
         RememberMeHandlerInterface $remember_me,
         InvitationWorker $invitation_worker
     ) {
-        $user = $this->session->get('user');
-        $verification_code = $this->session->get('verification_code');
+        $user = $request->getSession()->get('user');
+        $verification_code = $request->getSession()->get('verification_code');
 
         if (!$user || !$verification_code) {
             return $this->redirectToRoute('app_register');
@@ -113,12 +109,12 @@ class RegistrationController extends AbstractController
             if ($form->get('verification_code')->getData() == $verification_code) {
                 $em = $this->getDoctrine()->getManager();
                 $invitation = $em->getRepository(Invitation::class)
-                    ->findOneBy(['invitation_code' => $this->session->get('invitation_code')]);
+                    ->findOneBy(['invitation_code' => $request->getSession()->get('invitation_code')]);
 
-                $this->session->remove('user');
-                $this->session->remove('verification_code');
+                $request->getSession()->remove('user');
+                $request->getSession()->remove('verification_code');
                 $this->email_sender->removeEmailSendingCooldownEnd();
-                $this->session->remove('invitation_code');
+                $request->getSession()->remove('invitation_code');
 
                 if (!$invitation) {
                     $this->addFlash('registration_error', 'The invitation code is outdated.');
@@ -127,13 +123,13 @@ class RegistrationController extends AbstractController
                 }
 
                 $user->setLocale($request->getLocale());
-                $this->session->set('_locale', $request->getLocale());
+                $request->getSession()->set('_locale', $request->getLocale());
 
                 $user = $invitation_worker->use($invitation, $user);
 
                 $token = new PostAuthenticationToken($user, 'main', $user->getRoles());
                 $token_storage->setToken($token);
-                $this->session->set('_security_main', serialize($token));
+                $request->getSession()->set('_security_main', serialize($token));
                 $remember_me->createRememberMeCookie($user);
 
                 return $this->redirectToRoute('default');
@@ -144,7 +140,7 @@ class RegistrationController extends AbstractController
                 for ($i = 1; $i <= 6; $i++) {
                     $verification_code .= random_int(0, 9);
                 }
-                $this->session->set('verification_code', $verification_code);
+                $request->getSession()->set('verification_code', $verification_code);
 
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
@@ -180,10 +176,10 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/verify/email/resend', name: 'app_resend_verification_mail')]
-    public function resendVerififcationMail()
+    public function resendVerififcationMail(Request $request)
     {
-        $user = $this->session->get('user');
-        $verification_code = $this->session->get('verification_code');
+        $user = $request->getSession()->get('user');
+        $verification_code = $request->getSession()->get('verification_code');
 
         if (!$user || !$verification_code) {
             return $this->redirectToRoute('app_register');
@@ -194,7 +190,7 @@ class RegistrationController extends AbstractController
             for ($i = 1; $i <= 6; $i++) {
                 $verification_code .= random_int(0, 9);
             }
-            $this->session->set('verification_code', $verification_code);
+            $request->getSession()->set('verification_code', $verification_code);
 
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))

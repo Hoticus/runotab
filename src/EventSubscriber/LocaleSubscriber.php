@@ -12,13 +12,8 @@ use Twig\Extension\CoreExtension;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    private $parameter_bag;
-    private $twig;
-
-    public function __construct(ParameterBagInterface $parameter_bag, Environment $twig)
+    public function __construct(private ParameterBagInterface $parameter_bag, private Environment $twig)
     {
-        $this->parameter_bag = $parameter_bag;
-        $this->twig = $twig;
     }
 
     public function onKernelRequest(RequestEvent $event)

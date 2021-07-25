@@ -28,7 +28,8 @@ class SelectLanguageFormType extends AbstractType
         $builder
             ->add('language', ChoiceType::class, [
                 'choices' => $choices,
-                'data' => $options['user_locale']
+                'data' => $options['user_locale'],
+                'choice_translation_domain' => false
             ])
         ;
     }

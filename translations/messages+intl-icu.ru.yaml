@@ -1,6 +1,0 @@
-invite_users: >-
-  {users, plural,
-    one {1 пользователя}
-    few {# пользователя}
-    other {# пользователей}
-  }

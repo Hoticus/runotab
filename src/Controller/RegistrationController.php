@@ -11,7 +11,6 @@ use App\Service\InvitationWorker;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -68,7 +67,7 @@ class RegistrationController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject($this->translator->trans('Email Confirmation'))
+                ->subject($this->translator->trans('Email Confirmation', domain: 'email_verification_mail'))
                 ->htmlTemplate('security/email_verification_mail.html.twig')
                 ->context([
                     'verification_code' => $verification_code,
@@ -145,7 +144,7 @@ class RegistrationController extends AbstractController
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('Email Confirmation'))
+                    ->subject($this->translator->trans('Email Confirmation', domain: 'email_verification_mail'))
                     ->htmlTemplate('security/email_verification_mail.html.twig')
                     ->context([
                         'verification_code' => $verification_code,
@@ -195,7 +194,7 @@ class RegistrationController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject($this->translator->trans('Email Confirmation'))
+                ->subject($this->translator->trans('Email Confirmation', domain: 'email_verification_mail'))
                 ->htmlTemplate('security/email_verification_mail.html.twig')
                 ->context([
                     'verification_code' => $verification_code,

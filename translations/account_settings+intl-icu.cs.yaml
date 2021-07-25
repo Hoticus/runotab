@@ -1,0 +1,9 @@
+users: >-
+  {case, select,
+    accusative {{users, plural, 
+      one {1 uživatele}
+      few {# uživatele}
+      other {# uživatelů}
+    }}
+    other {uživatelé}
+  }

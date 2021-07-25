@@ -28,7 +28,8 @@ class SelectAvatarPhotoFormType extends AbstractType
                     ])
                 ],
                 'attr' => ['accept' => '.jpeg, .jpg, .png'],
-                'label_attr' => ['id' => 'select_avatar_photo_form_photo_label']
+                'label_attr' => ['id' => 'select_avatar_photo_form_photo_label'],
+                'label' => 'Select a new photo'
             ])
         ;
     }
@@ -37,6 +38,7 @@ class SelectAvatarPhotoFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Photo::class,
+            'translation_domain' => 'forms.select_avatar_photo'
         ]);
     }
 }

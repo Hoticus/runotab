@@ -1,4 +1,4 @@
-invite_users: >-
+users: >-
   {users, plural,
     one {1 user}
     other {# users}

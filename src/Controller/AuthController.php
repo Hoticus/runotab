@@ -62,7 +62,7 @@ class AuthController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject($this->translator->trans('Password Recovery'))
+                ->subject($this->translator->trans('Password Recovery', domain: 'password_recovery_mail'))
                 ->htmlTemplate('security/password_recovery_mail.html.twig')
                 ->context([
                     'recovery_code' => $recovery_code,
@@ -126,7 +126,7 @@ class AuthController extends AbstractController
                 $email = (new TemplatedEmail())
                     ->from(new Address('no-reply@runotab.com', 'Runotab'))
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('Password Recovery'))
+                    ->subject($this->translator->trans('Password Recovery', domain: 'password_recovery_mail'))
                     ->htmlTemplate('security/password_recovery_mail.html.twig')
                     ->context([
                         'recovery_code' => $recovery_code,
@@ -180,7 +180,7 @@ class AuthController extends AbstractController
             $email = (new TemplatedEmail())
                 ->from(new Address('no-reply@runotab.com', 'Runotab'))
                 ->to($user->getEmail())
-                ->subject($this->translator->trans('Password Recovery'))
+                ->subject($this->translator->trans('Password Recovery', domain: 'password_recovery_mail'))
                 ->htmlTemplate('security/password_recovery_mail.html.twig')
                 ->context([
                     'recovery_code' => $recovery_code,

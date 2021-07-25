@@ -60,7 +60,7 @@ class PasswordRecoverySecondFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            // Configure your form options here
+            'translation_domain' => 'forms.password_recovery_second'
         ]);
     }
 }

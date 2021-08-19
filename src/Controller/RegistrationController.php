@@ -31,7 +31,7 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(
         Request $request,
-        UserPasswordHasherInterface $password_encoder
+        UserPasswordHasherInterface $password_hasher
     ): Response {
         $user = new User();
         $request->getSession()->set('user', $user);
@@ -52,7 +52,7 @@ class RegistrationController extends AbstractController
             $request->getSession()->set('invitation_code', $invitation->getInvitationCode());
 
             $user->setPassword(
-                $password_encoder->hashPassword(
+                $password_hasher->hashPassword(
                     $user,
                     $form->get('password')->getData()
                 )

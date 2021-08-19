@@ -83,7 +83,7 @@ class AuthController extends AbstractController
     #[Route('/restore/password/confirm', name: 'app_restore_password_second')]
     public function restorePasswordSecond(
         Request $request,
-        UserPasswordHasherInterface $password_encoder,
+        UserPasswordHasherInterface $password_hasher,
         EmailSender $email_sender
     ) {
         if (!$email = $request->getSession()->get('password_recovery_email')) {
@@ -100,7 +100,7 @@ class AuthController extends AbstractController
 
             if ($form->get('recovery_code')->getData() == $request->getSession()->get('recovery_code')) {
                 $user->setPassword(
-                    $password_encoder->hashPassword(
+                    $password_hasher->hashPassword(
                         $user,
                         $form->get('password')->getData()
                     )
